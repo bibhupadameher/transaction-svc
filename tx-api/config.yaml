@@ -1,0 +1,21 @@
+local:
+  database:
+    host: localhost
+    port: 5432
+    user: tranuser
+    password: secretPassword@167
+    name: transvc
+    schema: transvc
+  jwt:
+    secret: "w4yZt6oQyL7v9+0H1JxFzvG3d+6G1Z3nR0gBfX7xS1Q="
+
+docker:
+  database:
+    host: postgres     
+    port: 5432
+    user: tranuser
+    password: secretPassword@167
+    name: transvc
+    schema: transvc
+  jwt:
+    secret: "w4yZt6oQyL7v9+0H1JxFzvG3d+6G1Z3nR0gBfX7xS1Q="
