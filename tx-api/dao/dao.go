@@ -4,11 +4,14 @@ import (
 	"context"
 	"tx-api/core/postgres"
 	"tx-api/model"
+
+	"github.com/google/uuid"
 )
 
 type TransactionDAOInterface interface {
-	GetAccountByID(ctx context.Context, id string) (model.Account, error)
-	BatchWriteData(ctx context.Context, savedData []model.TableName, deletedData ...model.TableName) error
+	GetAccountByID(ctx context.Context, id uuid.UUID) (model.Account, error)
+	SaveAccount(ctx context.Context, account *model.Account) error
+	SaveTransaction(ctx context.Context, trans *model.Transaction) error
 }
 
 // Implementation

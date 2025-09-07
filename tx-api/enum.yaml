@@ -7,3 +7,4 @@ operation_types:
     description: WITHDRAWAL
   - operation_type_id: 4
     description: PAYMENT
+    is_positive: true

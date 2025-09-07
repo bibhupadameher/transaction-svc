@@ -9,8 +9,6 @@ import (
 
 type Config struct {
 	Database Database `yaml:"database"`
-
-	JWT JWT `yaml:"jwt"`
 }
 type Database struct {
 	Host     string `yaml:"host"`
@@ -19,9 +17,6 @@ type Database struct {
 	Password string `yaml:"password"`
 	Name     string `yaml:"name"`
 	Schema   string `yaml:"schema"`
-}
-type JWT struct {
-	Secret string `yaml:"secret"`
 }
 
 var conf *Config

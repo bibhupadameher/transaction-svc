@@ -6,8 +6,6 @@ local:
     password: secretPassword@167
     name: transvc
     schema: transvc
-  jwt:
-    secret: "w4yZt6oQyL7v9+0H1JxFzvG3d+6G1Z3nR0gBfX7xS1Q="
 
 docker:
   database:
@@ -17,5 +15,4 @@ docker:
     password: secretPassword@167
     name: transvc
     schema: transvc
-  jwt:
-    secret: "w4yZt6oQyL7v9+0H1JxFzvG3d+6G1Z3nR0gBfX7xS1Q="
+

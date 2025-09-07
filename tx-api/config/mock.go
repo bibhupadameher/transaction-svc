@@ -11,8 +11,5 @@ func MockConfig() *Config {
 			Name:     "testdb",
 			Schema:   "testschema",
 		},
-		JWT: JWT{
-			Secret: "testsecret",
-		},
 	}
 }

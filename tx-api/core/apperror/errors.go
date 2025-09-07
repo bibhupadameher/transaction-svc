@@ -7,11 +7,11 @@ import (
 )
 
 type AppError struct {
-	Code       string
-	Message    string
-	Type       string
-	Details    string
-	HTTPStatus int
+	Code       string `json:"code"`
+	Message    string `json:"message"`
+	Type       string `json:"type"`
+	Details    string `json:"details"`
+	HTTPStatus int    `json:"-"`
 }
 
 func (e AppError) Error() string {

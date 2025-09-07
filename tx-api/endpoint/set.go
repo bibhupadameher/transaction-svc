@@ -7,16 +7,25 @@ import (
 )
 
 type Set struct {
-	CreateAccountEndpoint endpoint.Endpoint
+	CreateAccountEndpoint     endpoint.Endpoint
+	GetAccountEndpoint        endpoint.Endpoint
+	CreateTransactionEndpoint endpoint.Endpoint
 }
 
 func NewEndpointSet(svc service.TransactionServiceInterface) Set {
 
 	createAccountEndpoint := MakeCreateAccountEndpoint(svc)
-	//	createAccountEndpoint = AuthMiddleware()(createAccountEndpoint)
 	createAccountEndpoint = LoggingMiddleware()(createAccountEndpoint)
 
+	getAccountEndpoint := MakeGetAccountEndpoint(svc)
+	getAccountEndpoint = LoggingMiddleware()(getAccountEndpoint)
+
+	createTransactionEndpoint := MakeCreateTransactionEndpoint(svc)
+	createTransactionEndpoint = LoggingMiddleware()(createTransactionEndpoint)
+
 	return Set{
-		CreateAccountEndpoint: createAccountEndpoint,
+		CreateAccountEndpoint:     createAccountEndpoint,
+		GetAccountEndpoint:        getAccountEndpoint,
+		CreateTransactionEndpoint: createTransactionEndpoint,
 	}
 }

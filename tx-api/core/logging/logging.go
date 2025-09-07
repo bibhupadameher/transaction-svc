@@ -30,7 +30,6 @@ func Sync() {
 	}
 }
 
-// baseLogger extracts trace_id and user_id from context.
 func baseLogger(ctx context.Context) *zap.Logger {
 	traceID := GetTrace(ctx)
 	return log.With(
@@ -38,22 +37,18 @@ func baseLogger(ctx context.Context) *zap.Logger {
 	)
 }
 
-// Debug logs a debug message.
 func Debug(ctx context.Context, msg string, fields ...zap.Field) {
 	baseLogger(ctx).Debug(msg, fields...)
 }
 
-// Info logs an info message.
 func Info(ctx context.Context, msg string, fields ...zap.Field) {
 	baseLogger(ctx).Info(msg, fields...)
 }
 
-// Warn logs a warning message.
 func Warn(ctx context.Context, msg string, fields ...zap.Field) {
 	baseLogger(ctx).Warn(msg, fields...)
 }
 
-// Error logs an error message.
 func Error(ctx context.Context, msg string, fields ...zap.Field) {
 	baseLogger(ctx).Error(msg, fields...)
 }

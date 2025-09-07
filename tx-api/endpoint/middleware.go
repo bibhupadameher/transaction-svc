@@ -16,12 +16,13 @@ func LoggingMiddleware() endpoint.Middleware {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			start := time.Now()
 
-			logger.WithTrace(ctx, uuid.New().String())
+			ctx = logger.WithTrace(ctx, uuid.New().String())
+			traceID := logger.GetTrace(ctx)
 
 			resp, err := next(ctx, req)
 
 			elapsed := time.Since(start).String()
-			traceID := logger.GetTrace(ctx)
+			//	traceID = logger.GetTrace(ctx)
 
 			fields := []zap.Field{
 				zap.String("trace_id", traceID),

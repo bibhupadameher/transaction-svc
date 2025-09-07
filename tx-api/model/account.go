@@ -9,8 +9,9 @@ const TableNameAccount = "account"
 
 // Product model
 type Account struct {
-	AccountID      uuid.UUID `json:"accountID" gorm:"column:account_id;type:uuid;primaryKey"`
-	DocumentNumber string    `json:"documentNumber" gorm:"column:document_number;size:255;not null;uniqueIndex"`
+	AccountID      uuid.UUID     `json:"accountID" gorm:"column:account_id;type:uuid;primaryKey"`
+	DocumentNumber string        `json:"documentNumber" gorm:"column:document_number;size:255;not null;uniqueIndex"`
+	Transactions   []Transaction ` json:"-" gorm:"foreignKey:AccountID;constraint:OnDelete:CASCADE;"`
 }
 
 func (p *Account) BeforeCreate(tx *gorm.DB) (err error) {
