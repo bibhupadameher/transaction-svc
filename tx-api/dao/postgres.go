@@ -36,7 +36,7 @@ func (d *transactionDAO) GetAccountByID(ctx context.Context, accountID uuid.UUID
 		return db.Where("account_id = ?", accountID)
 	}); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = apperrors.NewErrRecordNotFound()
+			err = apperrors.NewErrRecordNotFound("accountID", accountID.String())
 			return account, err
 		}
 		err = apperrors.NewErrDatabaseError()

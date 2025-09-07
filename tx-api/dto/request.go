@@ -42,7 +42,7 @@ func (req *CreateAccountRequest) mapValidatorErr2WpErr(err error) apperror.Error
 }
 
 type GetAccountRequest struct {
-	AccountID uuid.UUID `json:"accountID" valid:"required,uuid"`
+	AccountID uuid.UUID `json:"accountID" valid:"required"`
 }
 
 func (req *GetAccountRequest) Validate() apperror.Errors {

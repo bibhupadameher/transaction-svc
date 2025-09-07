@@ -1,0 +1,121 @@
+{
+	"info": {
+		"_postman_id": "6f9c8b7b-42b9-4252-82ba-47dbca64c627",
+		"name": "transaction-svc",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11241400",
+		"_collection_link": "https://orange-desert-14498.postman.co/workspace/pismo~ac6784e5-297a-4104-8043-2c3f9a6d1ef4/collection/11241400-6f9c8b7b-42b9-4252-82ba-47dbca64c627?action=share&source=collection_link&creator=11241400"
+	},
+	"item": [
+		{
+			"name": "Create Account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();\r",
+							"if (jsonData.accountID) {\r",
+							"    pm.environment.set(\"accountID\", jsonData.accountID);\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"documentNumber\":\"{{$randomBankAccount}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/accounts",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Account",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/accounts/:accountId",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"accounts",
+						":accountId"
+					],
+					"variable": [
+						{
+							"key": "accountId",
+							"value": "{{accountID}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Transaction",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let randomFloat = (Math.random() * 1000).toFixed(2); // between 0.00 and 1000.00\r",
+							"pm.environment.set(\"amount\", randomFloat);\r",
+							"\r",
+							"let randomInt = Math.floor(Math.random() * 4) + 1; // 1 to 4 inclusive\r",
+							"pm.environment.set(\"operationTypeID\", randomInt);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"accountID\":\"{{accountID}}\",\r\n    \"operationTypeID\" :{{operationTypeID}},\r\n    \"amount\":{{amount}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/transactions",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"transactions"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

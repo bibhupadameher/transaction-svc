@@ -7,7 +7,6 @@ import (
 
 const TableNameAccount = "account"
 
-// Product model
 type Account struct {
 	AccountID      uuid.UUID     `json:"accountID" gorm:"column:account_id;type:uuid;primaryKey"`
 	DocumentNumber string        `json:"documentNumber" gorm:"column:document_number;size:255;not null;uniqueIndex"`

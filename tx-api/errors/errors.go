@@ -121,20 +121,23 @@ var (
 	errRecordNotFoundCode    = "A010006"
 	errRecordNotFoundType    = "InternalServerError"
 	errRecordNotFoundMessage = "record not found"
-	errRecordNotFoundDetails = "record not found"
+	errRecordNotFoundDetails = func(fieldName, fieldValue string) string {
+		return fmt.Sprintf(
+			"record not found for %s as %s in system", fieldName, fieldValue)
+	}
 )
 
 type ErrRecordNotFound struct {
 	apperror.AppError
 }
 
-func NewErrRecordNotFound() ErrRecordNotFound {
+func NewErrRecordNotFound(fieldName, fieldValue string) ErrRecordNotFound {
 	return ErrRecordNotFound{apperror.New(
 		errRecordNotFoundCode,
 		errRecordNotFoundType,
 		errRecordNotFoundMessage,
 		http.StatusInternalServerError,
-		errRecordNotFoundDetails,
+		errRecordNotFoundDetails(fieldName, fieldValue),
 	)}
 }
 

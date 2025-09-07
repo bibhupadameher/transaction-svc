@@ -14,17 +14,14 @@ type TransactionDAOInterface interface {
 	SaveTransaction(ctx context.Context, trans *model.Transaction) error
 }
 
-// Implementation
 type transactionDAO struct {
 	pgSvc postgres.DBService
 }
 
 func New() (TransactionDAOInterface, error) {
-
 	pgSvc, err := postgres.NewPostgresService()
 	if err != nil {
 		return nil, err
 	}
-
 	return &transactionDAO{pgSvc: pgSvc}, nil
 }
