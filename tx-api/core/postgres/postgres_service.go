@@ -5,18 +5,30 @@ import (
 	"fmt"
 	"os"
 	"tx-api/config"
-	model "tx-api/models"
+	"tx-api/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
+type DBService interface {
+	CreateSchema(schema string) error
+	SetSchema(schema string) error
+	MigrateTables(tables ...interface{}) error
+	MigrateEnums(tables ...interface{}) error
+	BatchWriteData(ctx context.Context, saveddata []model.TableName, deletedData ...model.TableName) error
+	FindRows(ctx context.Context, dest interface{}, query func(*gorm.DB) *gorm.DB) error
+	FindFirst(ctx context.Context, dest interface{}, query func(*gorm.DB) *gorm.DB) error
+}
+
 type PostgresService struct {
 	DB *gorm.DB
 }
 
-func NewPostgresService() (*PostgresService, error) {
+var _ DBService = (*PostgresService)(nil)
+
+func NewPostgresService() (DBService, error) {
 	gormConfig := &gorm.Config{}
 
 	env := os.Getenv("APP_ENV")
@@ -77,10 +89,15 @@ func (p *PostgresService) MigrateTables(tables ...interface{}) error {
 	return p.DB.AutoMigrate(tables...)
 }
 
-func (p *PostgresService) BatchWriteData(ctx context.Context, data ...interface{}) error {
+func (p *PostgresService) BatchWriteData(ctx context.Context, saveddata []model.TableName, deletedData ...model.TableName) error {
 	return p.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		for _, d := range data {
-			if err := tx.Create(d).Error; err != nil {
+		for _, d := range saveddata {
+			if err := tx.Save(d).Error; err != nil {
+				return err
+			}
+		}
+		for _, d := range deletedData {
+			if err := tx.Delete(d).Error; err != nil {
 				return err
 			}
 		}
@@ -92,6 +109,14 @@ func (p *PostgresService) FindRows(ctx context.Context, dest interface{}, query 
 	return query(p.DB.WithContext(ctx)).Find(dest).Error
 }
 
+func (p *PostgresService) FindFirst(ctx context.Context, dest interface{}, query func(*gorm.DB) *gorm.DB) error {
+	db := p.DB.WithContext(ctx)
+	if query != nil {
+		db = query(db)
+	}
+	return db.First(dest).Error
+}
+
 func (p *PostgresService) MigrateEnums(tables ...interface{}) error {
 	if len(tables) == 0 {
 		return nil
@@ -99,11 +124,9 @@ func (p *PostgresService) MigrateEnums(tables ...interface{}) error {
 
 	return p.DB.Transaction(func(tx *gorm.DB) error {
 		for _, tbl := range tables {
-
-			if err := tx.Model(tbl).Create(tbl).Error; err != nil {
+			if err := tx.Model(tbl).Save(tbl).Error; err != nil {
 				return err
 			}
-
 		}
 		return nil
 	})

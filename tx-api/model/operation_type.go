@@ -7,7 +7,6 @@ type OperationType struct {
 	Description     string `gorm:"column:description;not null" json:"description" yaml:"description"`
 }
 
-// TableName OperationType's table name
 func (OperationType) TableName() string {
 	return TableNameOperationType
 }

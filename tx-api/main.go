@@ -1,17 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"net/http"
 	"tx-api/config"
 	logger "tx-api/core/logging"
-	"tx-api/core/postgres"
+	"tx-api/endpoint"
+	httptransport "tx-api/http"
+	"tx-api/service"
 )
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello, Docker! 🚀")
-}
 
 func main() {
 
@@ -24,14 +22,17 @@ func main() {
 	}
 	defer logger.Sync()
 
-	pgService, err := postgres.NewPostgresService()
+	ctx := context.Background()
+	logger := logger.GetLogger()
+	svc, err := service.New(ctx, logger)
 	if err != nil {
-		log.Fatalf("log init pg service: %v", err)
+		log.Fatalf("service init failed: %v", err)
 	}
+	endpoints := endpoint.NewEndpointSet(svc)
 
-	fmt.Println("pgService", pgService)
+	handler := httptransport.NewHTTPHandler(endpoints)
 
-	http.HandleFunc("/", handler)
-	fmt.Println("Server running on :8080")
-	http.ListenAndServe(":8080", nil)
+	log.Println("Listening on :8080")
+	http.ListenAndServe(":8080", handler)
+
 }

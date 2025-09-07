@@ -32,10 +32,9 @@ func Sync() {
 
 // baseLogger extracts trace_id and user_id from context.
 func baseLogger(ctx context.Context) *zap.Logger {
-	traceID, userID := GetTraceAndUser(ctx)
+	traceID := GetTrace(ctx)
 	return log.With(
 		zap.String("trace_id", traceID),
-		zap.String("user_id", userID),
 	)
 }
 
@@ -57,4 +56,7 @@ func Warn(ctx context.Context, msg string, fields ...zap.Field) {
 // Error logs an error message.
 func Error(ctx context.Context, msg string, fields ...zap.Field) {
 	baseLogger(ctx).Error(msg, fields...)
+}
+func GetLogger() *zap.Logger {
+	return log
 }

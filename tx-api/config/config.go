@@ -8,18 +8,20 @@ import (
 )
 
 type Config struct {
-	Database struct {
-		Host     string `yaml:"host"`
-		Port     int    `yaml:"port"`
-		User     string `yaml:"user"`
-		Password string `yaml:"password"`
-		Name     string `yaml:"name"`
-		Schema   string `yaml:"schema"`
-	} `yaml:"database"`
+	Database Database `yaml:"database"`
 
-	JWT struct {
-		Secret string `yaml:"secret"`
-	} `yaml:"jwt"`
+	JWT JWT `yaml:"jwt"`
+}
+type Database struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Name     string `yaml:"name"`
+	Schema   string `yaml:"schema"`
+}
+type JWT struct {
+	Secret string `yaml:"secret"`
 }
 
 var conf *Config
