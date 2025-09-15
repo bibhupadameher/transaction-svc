@@ -15,6 +15,7 @@ type Transaction struct {
 	AccountID       uuid.UUID       `json:"accountID" gorm:"column:account_id;type:uuid;not null"`
 	OperationTypeID int             ` json:"operationTypeID" gorm:"column:operation_type_id;not null"`
 	Amount          decimal.Decimal `json:"amount" gorm:"column:amount; type:numeric"`
+	Balance         decimal.Decimal `json:"balance" gorm:"column:balance; type:numeric"`
 	EventDate       time.Time       `json:"eventDate" gorm:"column:event_date"`
 }
 

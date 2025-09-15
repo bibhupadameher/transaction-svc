@@ -11,7 +11,8 @@ import (
 type TransactionDAOInterface interface {
 	GetAccountByID(ctx context.Context, id uuid.UUID) (model.Account, error)
 	SaveAccount(ctx context.Context, account *model.Account) error
-	SaveTransaction(ctx context.Context, trans *model.Transaction) error
+	SaveTransactions(ctx context.Context, trans []model.Transaction) error
+	GetActiveTransactionsByAccountID(ctx context.Context, id uuid.UUID) ([]model.Transaction, error) //Active tx == transactions with balance<0
 }
 
 type transactionDAO struct {

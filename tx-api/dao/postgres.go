@@ -45,13 +45,20 @@ func (d *transactionDAO) GetAccountByID(ctx context.Context, accountID uuid.UUID
 
 	return account, nil
 }
-func (d *transactionDAO) SaveTransaction(ctx context.Context, trans *model.Transaction) error {
-	if err := d.pgSvc.BatchWriteData(ctx, []model.TableName{trans}); err != nil {
+func (d *transactionDAO) SaveTransactions(ctx context.Context, trans []model.Transaction) error {
+
+	var savedData []model.TableName
+
+	for i := range trans {
+		savedData = append(savedData, &trans[i])
+	}
+	if err := d.pgSvc.BatchWriteData(ctx, savedData); err != nil {
 		logger.Error(ctx, "error on batch write data", zap.Error(err))
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == string(constants.FOREIGN_KEY_VIOLATION) {
-				err = apperrors.NewErrForeignKeyViolation("accountID", trans.AccountID.String())
+				//TODO findout id of tx
+				err = apperrors.NewErrForeignKeyViolation("accountID", trans[0].AccountID.String())
 				return err
 			}
 		}
@@ -59,4 +66,20 @@ func (d *transactionDAO) SaveTransaction(ctx context.Context, trans *model.Trans
 		return err
 	}
 	return nil
+}
+
+func (d *transactionDAO) GetActiveTransactionsByAccountID(ctx context.Context, accountID uuid.UUID) ([]model.Transaction, error) {
+	var txs []model.Transaction
+	if err := d.pgSvc.FindRows(ctx, &txs, func(db *gorm.DB) *gorm.DB {
+		return db.Where("account_id = ?", accountID).Where("operation_type_id != 4").Where("balance < 0 ").Order("event_date")
+	}); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = apperrors.NewErrRecordNotFound("accountID", accountID.String())
+			return txs, err
+		}
+		err = apperrors.NewErrDatabaseError()
+		return txs, err
+	}
+
+	return txs, nil
 }

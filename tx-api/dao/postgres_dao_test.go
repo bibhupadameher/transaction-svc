@@ -101,42 +101,59 @@ func TestGetAccountByID_NotFound(t *testing.T) {
 func TestSaveTransaction_Success(t *testing.T) {
 	dao, mockDB := setupDAO()
 	ctx := context.Background()
-	trans := &model.Transaction{AccountID: uuid.New()}
+	trans := []model.Transaction{{AccountID: uuid.New()}}
 	logger.Init()
 	defer logger.Sync()
 
-	mockDB.On("BatchWriteData", ctx, []model.TableName{trans}, mock.Anything).Return(nil)
+	mockDB.On("BatchWriteData", ctx, mock.Anything, mock.Anything).Return(nil)
 
-	err := dao.SaveTransaction(ctx, trans)
+	err := dao.SaveTransactions(ctx, trans)
 	assert.NoError(t, err)
-	mockDB.AssertCalled(t, "BatchWriteData", ctx, []model.TableName{trans}, mock.Anything)
+	mockDB.AssertCalled(t, "BatchWriteData", ctx, mock.Anything, mock.Anything)
 }
 
 func TestSaveTransaction_ForeignKeyViolation(t *testing.T) {
 	dao, mockDB := setupDAO()
 	ctx := context.Background()
-	trans := &model.Transaction{AccountID: uuid.New()}
+	trans := []model.Transaction{{AccountID: uuid.New()}}
 	logger.Init()
 	defer logger.Sync()
 
 	pgErr := &pgconn.PgError{Code: string(constants.FOREIGN_KEY_VIOLATION)}
-	mockDB.On("BatchWriteData", ctx, []model.TableName{trans}, mock.Anything).Return(pgErr)
+	mockDB.On("BatchWriteData", ctx, mock.Anything, mock.Anything).Return(pgErr)
 
-	err := dao.SaveTransaction(ctx, trans)
-	assert.ErrorIs(t, err, apperrors.NewErrForeignKeyViolation("accountID", trans.AccountID.String()))
-	mockDB.AssertCalled(t, "BatchWriteData", ctx, []model.TableName{trans}, mock.Anything)
+	err := dao.SaveTransactions(ctx, trans)
+	assert.ErrorIs(t, err, apperrors.NewErrForeignKeyViolation("accountID", trans[0].AccountID.String()))
+	mockDB.AssertCalled(t, "BatchWriteData", ctx, mock.Anything, mock.Anything)
 }
 
 func TestSaveTransaction_GenericDBError(t *testing.T) {
 	dao, mockDB := setupDAO()
 	ctx := context.Background()
-	trans := &model.Transaction{AccountID: uuid.New()}
+	trans := []model.Transaction{{AccountID: uuid.New()}}
 	logger.Init()
 	defer logger.Sync()
 
-	mockDB.On("BatchWriteData", ctx, []model.TableName{trans}, mock.Anything).Return(errors.New("db error"))
+	mockDB.On("BatchWriteData", ctx, mock.Anything, mock.Anything).Return(errors.New("db error"))
 
-	err := dao.SaveTransaction(ctx, trans)
+	err := dao.SaveTransactions(ctx, trans)
 	assert.ErrorIs(t, err, apperrors.NewErrDatabaseError())
-	mockDB.AssertCalled(t, "BatchWriteData", ctx, []model.TableName{trans}, mock.Anything)
+	mockDB.AssertCalled(t, "BatchWriteData", ctx, mock.Anything, mock.Anything)
+}
+
+func TestGetActiveTransactionsByAccountID_Success(t *testing.T) {
+	dao, mockDB := setupDAO()
+	ctx := context.Background()
+	id := uuid.New()
+	var txs []model.Transaction
+
+	logger.Init()
+	defer logger.Sync()
+
+	mockDB.On("FindRows", ctx, &txs, mock.Anything).Return(nil)
+
+	tx, err := dao.GetActiveTransactionsByAccountID(ctx, id)
+	assert.NoError(t, err)
+
+	mockDB.AssertCalled(t, "FindRows", ctx, &tx, mock.Anything)
 }

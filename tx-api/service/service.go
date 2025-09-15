@@ -8,6 +8,7 @@ import (
 	"tx-api/dto"
 	"tx-api/model"
 
+	"github.com/shopspring/decimal"
 	"go.uber.org/zap"
 )
 
@@ -103,16 +104,51 @@ func (s *transactionServiceHandler) CreateTransaction(ctx context.Context, reque
 		return response, err
 	}
 
+	var txTobeSaved []model.Transaction
+
 	var tx model.Transaction
 	tx.AccountID = request.AccountID
 	tx.OperationTypeID = request.OperationTypeID
 	if request.IsPositive {
 		tx.Amount = request.Amount
+		tx.Balance = request.Amount
+
+		//find all tx
+		activeTx, err := s.dao.GetActiveTransactionsByAccountID(ctx, tx.AccountID)
+		if err != nil {
+			logger.Error(ctx, "error on query the active tx", zap.String("account_id", tx.AccountID.String()))
+			return response, err
+		}
+
+		for i := range activeTx {
+
+			if tx.Balance.IsPositive() {
+				sum := activeTx[i].Balance.Add(tx.Balance)
+				if sum.IsPositive() || sum.IsZero() { //if current balance >= tx'balance
+					tx.Balance = tx.Balance.Add(activeTx[i].Balance)
+					activeTx[i].Balance = decimal.Zero
+					txTobeSaved = append(txTobeSaved, activeTx[i])
+
+				} else {
+					activeTx[i].Balance = tx.Balance.Add(activeTx[i].Balance)
+					tx.Balance = decimal.Zero
+					txTobeSaved = append(txTobeSaved, activeTx[i])
+					break
+
+				}
+
+			}
+
+		}
+
 	} else {
 		tx.Amount = request.Amount.Neg()
-	}
+		tx.Balance = tx.Amount
 
-	if err := s.dao.SaveTransaction(ctx, &tx); err != nil {
+	}
+	txTobeSaved = append(txTobeSaved, tx)
+
+	if err := s.dao.SaveTransactions(ctx, txTobeSaved); err != nil {
 		logger.Error(ctx, "error on saving transaction", zap.Error(err))
 		return response, err
 	}

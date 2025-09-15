@@ -23,7 +23,12 @@ func (m *MockTransactionDAO) SaveAccount(ctx context.Context, account *model.Acc
 	return args.Error(0)
 }
 
-func (m *MockTransactionDAO) SaveTransaction(ctx context.Context, trans *model.Transaction) error {
+func (m *MockTransactionDAO) SaveTransactions(ctx context.Context, trans []model.Transaction) error {
 	args := m.Called(ctx, trans)
 	return args.Error(0)
+}
+
+func (m *MockTransactionDAO) GetActiveTransactionsByAccountID(ctx context.Context, accountID uuid.UUID) ([]model.Transaction, error) {
+	args := m.Called(ctx, accountID)
+	return args.Get(0).([]model.Transaction), args.Error(1)
 }

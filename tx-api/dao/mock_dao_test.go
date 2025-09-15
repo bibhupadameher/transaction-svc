@@ -39,11 +39,11 @@ func TestMockTransactionDAO_SaveAccount(t *testing.T) {
 func TestMockTransactionDAO_SaveTransaction(t *testing.T) {
 	mockDAO := new(MockTransactionDAO)
 	ctx := context.Background()
-	trans := &model.Transaction{AccountID: uuid.New()}
+	trans := []model.Transaction{{AccountID: uuid.New()}}
 
-	mockDAO.On("SaveTransaction", ctx, trans).Return(nil)
+	mockDAO.On("SaveTransactions", ctx, trans).Return(nil)
 
-	err := mockDAO.SaveTransaction(ctx, trans)
+	err := mockDAO.SaveTransactions(ctx, trans)
 	assert.NoError(t, err)
-	mockDAO.AssertCalled(t, "SaveTransaction", ctx, trans)
+	mockDAO.AssertCalled(t, "SaveTransactions", ctx, trans)
 }

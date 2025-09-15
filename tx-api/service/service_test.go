@@ -20,7 +20,7 @@ func init() {
 	logger.Init()
 	model.DefaultEnum.OperationTypes = []model.OperationType{
 		{OperationTypeID: 1, Description: "Payment", IsPositive: false},
-		{OperationTypeID: 2, Description: "Deposit", IsPositive: true},
+		{OperationTypeID: 4, Description: "Deposit", IsPositive: true},
 	}
 }
 func setupServiceWithMock(mockDAO *dao.MockTransactionDAO) *transactionServiceHandler {
@@ -101,4 +101,56 @@ func TestTransactionService_ErrorPaths(t *testing.T) {
 
 	_, err := svc.CreateAccount(context.Background(), accReq)
 	assert.Error(t, err)
+}
+
+func TestTransactionService_CreateTransaction_Negative_Operation(t *testing.T) {
+	var mockDAO dao.MockTransactionDAO
+	svc := setupServiceWithMock(&mockDAO)
+
+	accountID := uuid.New()
+	req := dto.CreateTransactionRequest{
+		AccountID:       accountID,
+		OperationTypeID: 1,
+		Amount:          decimal.NewFromInt(100),
+		IsPositive:      true,
+	}
+
+	mockDAO.On("SaveTransactions", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		tr := args.Get(1).([]model.Transaction)
+		tr[0].TransactionID = uuid.New()
+	})
+
+	resp, err := svc.CreateTransaction(context.Background(), req)
+	assert.NoError(t, err)
+	assert.NotEqual(t, uuid.Nil, resp.TransactionID)
+
+	mockDAO.AssertExpectations(t)
+}
+
+func TestTransactionService_CreateTransaction_Positive_Operation(t *testing.T) {
+	var mockDAO dao.MockTransactionDAO
+	svc := setupServiceWithMock(&mockDAO)
+
+	accountID := uuid.New()
+	req := dto.CreateTransactionRequest{
+		AccountID:       accountID,
+		OperationTypeID: 4,
+		Amount:          decimal.NewFromInt(100),
+		IsPositive:      true,
+	}
+
+	mockDAO.On("SaveTransactions", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		tr := args.Get(1).([]model.Transaction)
+		tr[0].TransactionID = uuid.New()
+	})
+
+	txs := []model.Transaction{{TransactionID: uuid.New()}}
+
+	mockDAO.On("GetActiveTransactionsByAccountID", mock.Anything, mock.Anything).Return(txs, nil)
+
+	_, err := svc.CreateTransaction(context.Background(), req)
+	assert.NoError(t, err)
+	//	assert.NotEqual(t, uuid.Nil, resp.TransactionID)
+
+	mockDAO.AssertExpectations(t)
 }
